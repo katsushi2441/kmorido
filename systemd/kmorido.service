@@ -1,0 +1,16 @@
+[Unit]
+Description=Kurage 盛土規制区域マップ (kmorido) :18312
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/kojima/work/kmorido
+Environment=KMORIDO_PORT=18312
+EnvironmentFile=-/home/kojima/work/kmorido/.env
+ExecStart=/home/kojima/work/kmorido/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 18312
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

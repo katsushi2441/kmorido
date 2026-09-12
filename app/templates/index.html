@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>その土地で盛土や切土をするのに、<br>許可は要りますか？</h1>
+<p class="muted">住所を入れると、盛土規制法（宅地造成及び特定盛土等規制法）の規制区域に入っているかを、
+告示番号つきで返します。全国{{ pref_count }}都道府県・{{ "{:,}".format(count) }}区域を収録。</p>
+
+<div class="card">
+  <form class="search" method="get" action="./">
+    <input type="text" name="q" value="{{ q }}" placeholder="例: 熱海市伊豆山　／　名古屋市千種区" autofocus>
+    <button type="submit">調べる</button>
+  </form>
+  <p class="muted" style="margin:10px 0 0">町名まで入れると精度が上がります。番地は代表点に丸められます。</p>
+</div>
+
+{% if error %}<div class="card"><p style="color:var(--warn);font-weight:700">{{ error }}</p></div>{% endif %}
+
+{% if result %}
+  {% if result.status == 'inside' %}
+    <div class="card hit">
+    <h2 style="border:0;margin-top:0">規制区域内です</h2>
+    <p>{{ result.address }}（{{ "%.5f"|format(result.lat) }}, {{ "%.5f"|format(result.lon) }}）は、
+       次の規制区域に入っています。</p>
+    {% for a in result.areas %}
+    <table>
+      <tr><th>区域の種別</th><td><b>{{ a.area_type }}</b></td></tr>
+      {% if meaning.get(a.area_type_code) %}
+      <tr><th>何が必要になるか</th><td>{{ meaning[a.area_type_code]|replace('**','')|safe }}</td></tr>
+      {% endif %}
+      <tr><th>指定した主体</th><td>{{ a.subject }}{% if a.city %}（{{ a.city }}）{% endif %}</td></tr>
+      <tr><th>告示番号</th><td>{{ a.notice_no or '（記載なし）' }}</td></tr>
+      <tr><th>施行年月日</th><td>{{ a.effective_date or '（記載なし）' }}</td></tr>
+    </table>
+    {% endfor %}
+    {% for n in result.notes %}<div class="note">{{ n }}</div>{% endfor %}
+    <p><a href="{{ root }}map/?lat={{ "%.6f"|format(result.lat) }}&amp;lon={{ "%.6f"|format(result.lon) }}">地図で区域の広がりを見る</a></p>
+    </div>
+  {% elif result.status == 'outside' %}
+    <div class="card miss">
+    <h2 style="border:0;margin-top:0">収録している規制区域には入っていません</h2>
+    <p>{{ result.address }}</p>
+    {% for n in result.notes %}<div class="note">{{ n }}</div>{% endfor %}
+    <p><a href="{{ root }}map/?lat={{ "%.6f"|format(result.lat) }}&amp;lon={{ "%.6f"|format(result.lon) }}">地図で近くの区域を見る</a></p>
+    </div>
+  {% else %}
+    <div class="card">
+    <h2 style="border:0;margin-top:0">この都道府県のデータはまだありません</h2>
+    <p>{{ result.address }}</p>
+    {% for n in result.notes %}<div class="note">{{ n }}</div>{% endfor %}
+    </div>
+  {% endif %}
+{% endif %}
+
+<h2>大規模盛土造成地マップとは別のものです</h2>
+<div class="card">
+<table>
+  <tr><th>大規模盛土造成地マップ</th><td>そこに<b>盛土がある</b>という土地の成り立ちを示す図。工事の可否は決めません。</td></tr>
+  <tr><th>盛土規制法の規制区域<br>（このサイト）</th><td>そこで盛土・切土をするには<b>許可または届出が要る</b>という法律上の線。
+    宅地造成等工事規制区域は、土地の売買で<b>重要事項説明の対象</b>です。</td></tr>
+</table>
+<p class="muted">2021年の熱海市の土石流を受けて、2023年5月に盛土規制法が施行されました。
+区域の指定は都道府県ごとに進んでいる途中です。</p>
+</div>
+
+<h2>よくある質問</h2>
+<div class="card">
+{% for q_, a_ in faq %}
+  <p style="margin:0 0 4px"><b>{{ q_ }}</b></p>
+  <p class="muted" style="margin:0 0 16px">{{ a_ }}</p>
+{% endfor %}
+</div>
+{% endblock %}

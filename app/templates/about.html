@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}このデータについて｜{{ site }}{% endblock %}
+{% block desc %}収録している盛土規制法の規制区域データの出典・時点・範囲と、判定の限界を説明します。{% endblock %}
+{% block body %}
+<h1>このデータについて</h1>
+
+<h2>出典</h2>
+<div class="card">
+<table>
+  <tr><th>データ</th><td>国土数値情報「宅地造成等工事規制区域・特定盛土等規制区域」（A56）／国土交通省</td></tr>
+  <tr><th>ライセンス</th><td>CC BY 4.0（出典表示のうえ商用利用できます）</td></tr>
+  <tr><th>データ時点</th><td>{{ vintage }}</td></tr>
+  <tr><th>収録</th><td>{{ "{:,}".format(count) }}区域／{{ "{:,}".format(city_count) }}市区町村／{{ pref_count }}都道府県</td></tr>
+  <tr><th>根拠法</th><td>宅地造成及び特定盛土等規制法（盛土規制法）／2023年5月26日施行</td></tr>
+</table>
+<p class="muted">{{ attribution }}</p>
+</div>
+
+<h2>できないこと（先に書いておきます）</h2>
+<div class="card">
+<div class="note"><b>申請資料には使えません。</b>配布元が「本データは概略的な位置を示すものであり、法的図書ではありません。
+申請資料や根拠を示す必要がある資料への利用はできません」と明記しています。このサイトも同じ制約の中にあります。</div>
+<ul>
+  <li>正確な区域の線は示せません。住所から求めた座標は町丁目のおおよその位置です。<b>地番での判定は、告示番号をもとに指定した自治体の担当課で確認してください。</b></li>
+  <li>区域の指定は進行中です。まだ指定・公開されていない都道府県は「区域外」ではなく<b>「まだデータがありません」</b>と表示します。規制が無いという意味ではありません。</li>
+  <li>区域外であることは安全という意味ではありません。この区域は「工事に許可・届出が要る範囲」で、災害の危険そのものを示すものではありません。</li>
+</ul>
+</div>
+
+<h2>区域の種別について</h2>
+<div class="card">
+<table>
+  <tr><th>宅地造成等工事規制区域</th><td>{{ meaning['1']|replace('**','')|safe }}</td></tr>
+  <tr><th>特定盛土等規制区域</th><td>{{ meaning['2']|replace('**','')|safe }}</td></tr>
+  <tr><th>両方（区分なし）</th><td>{{ meaning['9']|replace('**','')|safe }}</td></tr>
+</table>
+<p class="muted">「両方（区分なし）」は、指定した自治体が両区域を同時に指定していて、
+データ上どちらか分けて記録されていないものです（全国で約5,500区域）。</p>
+</div>
+
+<h2>関連するツール</h2>
+<div class="card">
+<ul>
+  <li><a href="{{ links.kriskarea }}" target="_blank" rel="noopener">Kurage 災害危険区域マップ</a> — 建築基準法39条。条例で住宅の建築が制限される区域</li>
+  <li><a href="{{ links.kflood }}" target="_blank" rel="noopener">Kurage 洪水・内水ハザードマップ</a> — 浸水の想定</li>
+  <li><a href="{{ links.khazard }}" target="_blank" rel="noopener">Kurage 土砂災害マップ</a> — 土砂災害警戒区域</li>
+  <li><a href="{{ links.mlit }}" target="_blank" rel="noopener">盛土規制法について（国土交通省）</a></li>
+</ul>
+</div>
+{% endblock %}
