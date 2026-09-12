@@ -42,6 +42,8 @@ app.mount("/static", StaticFiles(directory=os.path.join(ROOT, "app", "static")),
 INDEX = Index()
 
 LINKS = {
+    # 買い切り版の商品ページ。デモから商品へ必ず導線を張る（全製品そろえる）
+    "kappstore": "https://kappstore.exbridge.jp/app.php?id=40efd031ba24c9d8&ref=kmorido",
     "kriskarea": "https://kurage.exbridge.jp/kriskarea.php/",
     "kflood": "https://kurage.exbridge.jp/kflood.php/",
     "khazard": "https://kurage.exbridge.jp/khazard.php/",
@@ -304,6 +306,11 @@ def llms():
 - 未収録（まだ指定・公開されていない）: {", ".join(missing) if missing else "なし"}
 - データ時点: {INDEX.vintage}
 - {INDEX.attribution}
+
+
+## 買い切り版
+- 商品ページ: https://kappstore.exbridge.jp/app.php?id=40efd031ba24c9d8
+- 税込55,000円。ソースコード（MIT）・データ取り込みスクリプト・設置手順書を同梱。自社サーバーで動かせる。
 
 ## 使い方
 - 住所で調べる: {PUBLIC_BASE}/?q=<住所>
