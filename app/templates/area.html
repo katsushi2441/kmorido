@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ m.pref }}{{ m.city }}の盛土規制区域｜{{ "{:,}".format(m.areas) }}区域を住所で判定 | {{ site }}{% endblock %}
+{% block desc %}{{ m.pref }}{{ m.city }}の盛土規制区域は{{ "{:,}".format(m.areas) }}区域（宅地造成等工事規制区域{{ "{:,}".format(m.takuchi) }}・特定盛土等規制区域{{ "{:,}".format(m.morido) }}{% if m.both %}・両方の指定{{ "{:,}".format(m.both) }}{% endif %}）。指定したのは{{ m.subject }}。住所を入れると、その土地が区域の内か外かを判定します。{% endblock %}
+{% block head %}<style>
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.mcard{border:1px solid #dfe6ea;border-radius:10px;padding:10px 12px;background:#fff;min-width:0}
+.mk{font-size:12px;color:#5b6b76}.mv{font-size:19px;font-weight:700;margin-top:3px}
+.mlist{font-size:14px;line-height:2;columns:2;column-gap:22px}@media(max-width:560px){.mlist{columns:1}}
+.mtbl{width:100%;border-collapse:collapse;font-size:14px}.mtbl th,.mtbl td{border:1px solid #e3e9ec;padding:6px 8px;text-align:left}
+.mtbl th{background:#f5f8f9;white-space:nowrap}.mwrap{overflow-x:auto}
+</style>{% endblock %}
+{% block body %}
+<nav class="src" style="margin-bottom:8px"><a href="{{ root }}">住所で調べる</a> › <a href="{{ root }}area/">地域一覧</a> › <a href="{{ root }}area/pref/{{ m.pref_code }}">{{ m.pref }}</a> › {{ m.city }}</nav>
+<h1>{{ m.pref }}{{ m.city }}の盛土規制区域</h1>
+<p class="lead">{{ m.pref }}{{ m.city }}には盛土規制法の規制区域が<strong>{{ "{:,}".format(m.areas) }}区域</strong>あります。区域の中で盛土や切土の工事をするには、<strong>許可または届出が要ります</strong>。土地の売買では重要事項説明の対象です。住所を入れると、その土地が区域の内か外かを判定します。</p>
+
+<form class="search" action="{{ root }}" method="get">
+<input type="text" name="q" value="{{ m.pref }}{{ m.city }}" placeholder="例: {{ m.pref }}{{ m.city }}" required>
+<button type="submit">この住所で判定する</button></form>
+
+<h2>{{ m.city }}の指定状況（実データ）</h2>
+<div class="mgrid">
+<div class="mcard"><div class="mk">区域の合計</div><div class="mv">{{ "{:,}".format(m.areas) }}</div></div>
+{% if m.takuchi %}<div class="mcard"><div class="mk">宅地造成等工事規制区域</div><div class="mv">{{ "{:,}".format(m.takuchi) }}</div></div>{% endif %}
+{% if m.morido %}<div class="mcard"><div class="mk">特定盛土等規制区域</div><div class="mv">{{ "{:,}".format(m.morido) }}</div></div>{% endif %}
+{% if m.both %}<div class="mcard"><div class="mk">両方を指定（区分なし）</div><div class="mv">{{ "{:,}".format(m.both) }}</div></div>{% endif %}
+<div class="mcard"><div class="mk">指定した自治体</div><div class="mv" style="font-size:16px">{{ m.subject }}</div></div>
+<div class="mcard"><div class="mk">告示の数</div><div class="mv">{{ "{:,}".format(m.notices) }}</div></div>
+</div>
+<p class="src">
+{% if m.first_eff == m.last_eff %}施行年月日は {{ m.first_eff }}。{% else %}施行年月日は {{ m.first_eff }} から {{ m.last_eff }} まで。{% endif %}
+「宅地造成等工事規制区域」は市街地に近い区域、「特定盛土等規制区域」は市街地から離れていても盛土で被害が出るおそれのある区域です。どちらも規制の対象で、規模によって許可か届出かが変わります。</p>
+
+{% if m.samples %}
+<h2>{{ m.city }}の告示の例</h2>
+<div class="mwrap"><table class="mtbl"><tr><th>区域の種別</th><th>告示番号</th><th>施行年月日</th></tr>
+{% for s in m.samples %}<tr><td>{{ s.area_type }}</td><td>{{ s.notice_no }}</td><td>{{ s.effective_date }}</td></tr>{% endfor %}
+</table></div>
+{% endif %}
+
+{% if siblings %}
+<h2>{{ m.pref }}の他の市区町村</h2>
+<div class="mlist">{% for x in siblings %}<a href="{{ root }}area/{{ x.admin_code }}">{{ x.city }}</a>（{{ "{:,}".format(x.areas) }}区域）<br>{% endfor %}</div>
+<p class="src" style="margin-top:8px"><a href="{{ root }}area/pref/{{ m.pref_code }}">{{ m.pref }}の全市区町村一覧</a></p>
+{% endif %}
+
+<h2>あわせて確認したい方へ</h2>
+<p>大規模盛土造成地マップは「そこに盛土がある」を示す図で、このページの規制区域は「そこで工事をするには許可・届出が要る」という法的な線です。別のものなので両方を見てください。
+{{ m.city }}の土砂災害警戒区域は <a href="{{ links.khazard }}" target="_blank" rel="noopener">土砂災害ハザードマップ</a>、条例の災害危険区域は <a href="{{ links.kriskarea }}" target="_blank" rel="noopener">災害危険区域マップ</a>、洪水は <a href="{{ links.kflood }}" target="_blank" rel="noopener">洪水・内水ハザードマップ</a> で調べられます。地図で見るなら <a href="{{ root }}map/">全国地図</a>、全国版は <a href="{{ root }}">{{ site }}</a> です。</p>
+<p class="src">区域の形は概略位置で、法的図書ではありません。実際の区域境界は指定した自治体の告示図書で確認してください。</p>
+{% endblock %}

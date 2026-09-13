@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}全国の盛土規制区域｜都道府県・市区町村別の指定状況 | {{ site }}{% endblock %}
+{% block desc %}全国{{ "{:,}".format(muni_count) }}市区町村・{{ "{:,}".format(total) }}区域の盛土規制区域を、市区町村ごとの指定件数つきで一覧にしました。都道府県から市区町村を選べます。{% endblock %}
+{% block head %}<style>.mtbl{width:100%;border-collapse:collapse;font-size:14px}.mtbl th,.mtbl td{border:1px solid #e3e9ec;padding:6px 8px;text-align:left}.mtbl th{background:#f5f8f9;white-space:nowrap}.mwrap{overflow-x:auto}</style>{% endblock %}
+{% block body %}
+<nav class="src" style="margin-bottom:8px"><a href="{{ root }}">住所で調べる</a> › 地域一覧</nav>
+<h1>地域から盛土規制区域を調べる</h1>
+<p class="lead">全国<strong>{{ "{:,}".format(muni_count) }}市区町村</strong>・計<strong>{{ "{:,}".format(total) }}区域</strong>を収録しています。都道府県を選ぶと市区町村ごとの指定件数が出ます。住所で直接調べるなら <a href="{{ root }}">全国版</a>、地図で見るなら <a href="{{ root }}map/">全国地図</a> をどうぞ。</p>
+<div class="mwrap"><table class="mtbl"><tr><th>都道府県</th><th>市区町村</th><th>区域数</th></tr>
+{% for pc, lst in prefs %}<tr><td><a href="{{ root }}area/pref/{{ pc }}">{{ lst[0].pref }}</a></td><td>{{ "{:,}".format(lst|length) }}</td><td>{{ "{:,}".format(lst|sum(attribute='areas')) }}</td></tr>{% endfor %}
+</table></div>
+<p class="src" style="margin-top:14px">盛土規制法（宅地造成及び特定盛土等規制法）の規制区域は、指定した都道府県・指定都市・中核市の告示で定まります。区域の形は概略位置で、法的図書ではありません。</p>
+{% endblock %}

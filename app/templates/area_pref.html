@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ pref }}の盛土規制区域｜市区町村別の指定状況 | {{ site }}{% endblock %}
+{% block desc %}{{ pref }}の盛土規制区域は{{ "{:,}".format(rows|length) }}市区町村で計{{ "{:,}".format(total) }}区域。市区町村を選ぶか住所を入れると、その土地が宅地造成等工事規制区域・特定盛土等規制区域に入っているかを判定します。{% endblock %}
+{% block head %}<style>.mtbl{width:100%;border-collapse:collapse;font-size:14px}.mtbl th,.mtbl td{border:1px solid #e3e9ec;padding:6px 8px;text-align:left}.mtbl th{background:#f5f8f9;white-space:nowrap}.mwrap{overflow-x:auto}</style>{% endblock %}
+{% block body %}
+<nav class="src" style="margin-bottom:8px"><a href="{{ root }}">住所で調べる</a> › <a href="{{ root }}area/">地域一覧</a> › {{ pref }}</nav>
+<h1>{{ pref }}の盛土規制区域（市区町村一覧）</h1>
+<p class="lead">{{ pref }}では<strong>{{ "{:,}".format(rows|length) }}市区町村</strong>に計<strong>{{ "{:,}".format(total) }}区域</strong>が指定されています。市区町村ごとの内訳は下の表からどうぞ。</p>
+<div class="mwrap"><table class="mtbl"><tr><th>市区町村</th><th>区域数</th><th>宅地造成等工事規制区域</th><th>特定盛土等規制区域</th><th>指定した自治体</th></tr>
+{% for r in rows %}<tr><td><a href="{{ root }}area/{{ r.admin_code }}">{{ r.city }}</a></td><td>{{ "{:,}".format(r.areas) }}</td><td>{{ "{:,}".format(r.takuchi) }}</td><td>{{ "{:,}".format(r.morido) }}</td><td>{{ r.subject }}</td></tr>{% endfor %}
+</table></div>
+<p class="src" style="margin-top:14px">全国版は <a href="{{ root }}">{{ site }}</a>、地図は <a href="{{ root }}map/">全国地図</a>、他県は <a href="{{ root }}area/">地域一覧</a>。</p>
+{% endblock %}
