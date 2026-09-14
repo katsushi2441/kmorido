@@ -173,7 +173,7 @@ def page(request: Request, name: str, **kw):
               count=INDEX.count, city_count=INDEX.city_count, pref_count=INDEX.pref_count,
               vintage=INDEX.vintage, attribution=INDEX.attribution, meaning=AREA_MEANING,
               public_base=PUBLIC_BASE, canonical=PUBLIC_BASE + path,
-              root=root_prefix(path), jsonld=jsonld_for(path), faq=FAQ)
+              terms=TERMS, root=root_prefix(path), jsonld=jsonld_for(path), faq=FAQ)
     return templates.TemplateResponse(request, name, kw)
 
 
@@ -262,6 +262,19 @@ def healthz():
 def about(request: Request):
     return page(request, "about.html")
 
+
+
+# 検索する人の言い方と、法令・行政の用語はずれている。両方の語で拾えるようにする。
+# 実例: 名古屋市は「内水ハザードマップ」を「雨水出水浸水想定区域」へ改称し、URLも変えた
+# （旧URLは404。2026-09-14 実測）。
+TERMS = [
+    ('盛土規制', '宅地造成及び特定盛土等規制法（盛土規制法）'),
+    ('宅地造成工事規制区域', '宅地造成等工事規制区域（2023年の法改正で「等」が入りました）'),
+    ('盛土の届出が要る区域', '特定盛土等規制区域'),
+    ('大規模盛土造成地マップ', '別のもの。あちらは「盛土がある場所」、ここは「工事に許可・届出が要る区域」'),
+    ('造成・切土・埋め立て', '盛土等（規模によって許可か届出かが変わります）'),
+    ('土捨て場・残土処分', '特定盛土等・土石の堆積'),
+]
 
 MUNI = {}
 MUNI_BY_PREF = {}

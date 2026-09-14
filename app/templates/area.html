@@ -48,4 +48,12 @@
 <p>大規模盛土造成地マップは「そこに盛土がある」を示す図で、このページの規制区域は「そこで工事をするには許可・届出が要る」という法的な線です。別のものなので両方を見てください。
 {{ m.city }}の土砂災害警戒区域は <a href="{{ links.khazard }}" target="_blank" rel="noopener">土砂災害ハザードマップ</a>、条例の災害危険区域は <a href="{{ links.kriskarea }}" target="_blank" rel="noopener">災害危険区域マップ</a>、洪水は <a href="{{ links.kflood }}" target="_blank" rel="noopener">洪水・内水ハザードマップ</a> で調べられます。地図で見るなら <a href="{{ root }}map/">全国地図</a>、全国版は <a href="{{ root }}">{{ site }}</a> です。</p>
 <p class="src">区域の形は概略位置で、法的図書ではありません。実際の区域境界は指定した自治体の告示図書で確認してください。</p>
+
+<div class="panel">
+<h2 style="margin-top:0">検索でよく使われる言い方と、行政の用語</h2>
+<div class="mwrap"><table class="mtbl"><tr><th>ふだんの言い方</th><th>法令・行政の用語</th></tr>
+{% for a, b in terms %}<tr><td>{{ a }}</td><td>{{ b }}</td></tr>{% endfor %}
+</table></div>
+<p class="src">自治体のページは法令の用語で書かれているので、ふだんの言い方で検索すると見つからないことがあります。名古屋市は「内水ハザードマップ」を「雨水出水浸水想定区域」へ改めていました（2026-09-14 実測）。このページはどちらの言い方でも同じ答えを返します。</p>
+</div>
 {% endblock %}
