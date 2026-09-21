@@ -42,6 +42,15 @@ class Area:
 
 
 @dataclass
+class FillSlope:
+    """大規模盛土造成地（A54）。規制区域（A56）とは別物なので型を分ける。"""
+    city: str
+    number: str
+    class_code: str
+    class_name: str
+
+
+@dataclass
 class Result:
     lat: float
     lon: float
@@ -52,6 +61,11 @@ class Result:
     notes: list[str] = field(default_factory=list)
     vintage: str = ""
     attribution: str = ""
+    # 大規模盛土造成地（A54）。status は inside / outside / uncovered
+    fill_status: str = "uncovered"
+    fills: list[FillSlope] = field(default_factory=list)
+    fill_vintage: str = ""
+    fill_attribution: str = ""
 
 
 class Index:
@@ -66,6 +80,12 @@ class Index:
         self._admin_codes: set[str] = set()
         self.vintage = ""
         self.attribution = ""
+        self._fill_rows: list[sqlite3.Row] = []
+        self._fill_geoms: list = []
+        self._fill_tree: STRtree | None = None
+        self._fill_prefs: set[str] = set()
+        self.fill_vintage = ""
+        self.fill_attribution = ""
 
     def load(self) -> None:
         conn = sqlite3.connect(self.db)
@@ -77,8 +97,19 @@ class Index:
         meta = conn.execute("SELECT data_vintage, attribution FROM datasets LIMIT 1").fetchone()
         if meta:
             self.vintage, self.attribution = meta["data_vintage"], meta["attribution"]
+        # 大規模盛土造成地（A54）。取り込んでいない設置でも動くように、無ければ黙って空にする。
+        try:
+            self._fill_rows = conn.execute("SELECT * FROM fill_slopes").fetchall()
+            self._fill_geoms = [shape(json.loads(r["geometry"])) for r in self._fill_rows]
+            self._fill_prefs = {r["pref_code"] for r in self._fill_rows}
+            fm = conn.execute("SELECT data_vintage, attribution FROM fill_datasets LIMIT 1").fetchone()
+            if fm:
+                self.fill_vintage, self.fill_attribution = fm["data_vintage"], fm["attribution"]
+        except sqlite3.Error:
+            self._fill_rows, self._fill_geoms, self._fill_prefs = [], [], set()
         conn.close()
         self._tree = STRtree(self._geoms) if self._geoms else None
+        self._fill_tree = STRtree(self._fill_geoms) if self._fill_geoms else None
 
     @property
     def count(self) -> int:
@@ -108,12 +139,31 @@ class Index:
         """
         return bool(admin_code) and admin_code[:2] in self._pref_codes
 
+    def check_fill(self, out: Result, pt) -> None:
+        """大規模盛土造成地に入っているか。**取り込んでいない県は「区域外」と言わない。**"""
+        out.fill_vintage, out.fill_attribution = self.fill_vintage, self.fill_attribution
+        if self._fill_tree is None or not self._fill_rows:
+            out.fill_status = "uncovered"
+            return
+        hit = [i for i in self._fill_tree.query(pt) if self._fill_geoms[i].covers(pt)]
+        if hit:
+            out.fill_status = "inside"
+            out.fills = [FillSlope(self._fill_rows[i]["city"] or "", self._fill_rows[i]["number"] or "",
+                                   self._fill_rows[i]["class_code"] or "", self._fill_rows[i]["class_name"] or "")
+                         for i in hit]
+            return
+        out.fill_status = "outside"
+
     def check(self, lat: float, lon: float, address: str = "", admin_code: str = "") -> Result:
         if self._tree is None:
             self.load()
         out = Result(lat=lat, lon=lon, address=address,
                      vintage=self.vintage, attribution=self.attribution)
         pt = Point(lon, lat)
+        if admin_code and admin_code[:2] not in self._fill_prefs:
+            out.fill_status = "uncovered"
+        else:
+            self.check_fill(out, pt)
         hit = [i for i in self._tree.query(pt) if self._geoms[i].covers(pt)]
         if hit:
             out.status = "inside"

@@ -61,3 +61,23 @@ PostGIS も Docker も要らない。10万件なら SQLite + shapely の STRtree
 - [Kurage 洪水・内水ハザードマップ](https://kurage.exbridge.jp/kflood.php/)
 
 MIT License / EXBRIDGE, Inc.
+
+## 大規模盛土造成地（A54）も同じ住所で返す（2026-09-21 追加）
+
+上の表で「別のもの」と書いた**大規模盛土造成地**を、同じ判定に足した。
+規制区域（A56）は「工事に許可が要る線」、大規模盛土造成地（A54）は「そこに盛土がある事実」。
+両方を1回の住所判定で返す。
+
+- 取り込み: `/usr/bin/python3 scripts/load_a54.py 23`（都道府県コード。省略で全国）
+- 収録（愛知県）: **3,674地区**（名古屋市626・豊田市331・岡崎市296…）
+- 盛土区分は国の対応表どおり **1=谷埋め型 / 2=腹付け型 / 9=区分をしていない**
+  （`codelist/fillSlopeClassification.xlsx` を取得して確認。当社で推測した名前は付けていない）
+- データ基準は2023年3月31日。CC BY 4.0
+- API は `fill_slope` キーで返す（`status` は inside / outside / uncovered）
+- **取り込んでいない県では「区域外」と言わない。**「データをまだ取り込んでいません」と書く
+
+### 配布が GML しかない
+
+A54 は Shapefile も GeoJSON も無く、ksj 独自スキーマの GML（XML）だけ。
+GDAL の GML ドライバでもレイヤとして開けない（xlink 参照のため）。
+`scripts/load_a54.py` が自前で読む（Curve→Surface→Feature の3段を解決。座標は緯度経度の順）。

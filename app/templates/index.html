@@ -50,6 +50,31 @@
   {% endif %}
 {% endif %}
 
+{% if result %}
+<h2>この土地に「大規模盛土造成地」はありますか</h2>
+{% if result.fill_status == 'inside' %}
+<div class="card hit">
+  <p><b>この住所は、大規模盛土造成地の範囲内です。</b></p>
+  <table>
+  {% for f in result.fills %}<tr><th>{{ f.city }} {{ f.number }}</th><td>盛土区分: <b>{{ f.class_name or '（区分の記載なし）' }}</b></td></tr>{% endfor %}
+  </table>
+  <div class="note">これは<b>そこに盛土があるという土地の成り立ち</b>で、工事の許可が要るかどうか（上の規制区域）とは別です。すぐ危険という意味でもありません。大地震のときに滑動崩落が起きうる場所として、国と自治体が範囲を示しているものです。</div>
+  <div class="note">範囲は<b>概ねのもの</b>です。自分の敷地が入るかどうかは、市区町村が公表している大規模盛土造成地マップで確認してください。</div>
+</div>
+{% elif result.fill_status == 'outside' %}
+<div class="card">
+  <p>この住所は、大規模盛土造成地の範囲には入っていません。</p>
+  <div class="note">盛土が無いという意味ではありません。国のデータに載るのは「大規模」なもの（谷埋め型で面積3,000平方メートル以上など）だけです。小さな盛土や古い造成は含まれません。</div>
+</div>
+{% else %}
+<div class="card">
+  <p>この住所の都道府県は、大規模盛土造成地のデータをまだ取り込んでいません。</p>
+  <div class="note"><b>盛土が無いという意味ではありません。</b>市区町村が公表している大規模盛土造成地マップで確認してください。</div>
+</div>
+{% endif %}
+{% if result.fill_attribution %}<p class="muted">{{ result.fill_attribution }}／{{ result.fill_vintage }}</p>{% endif %}
+{% endif %}
+
 <h2>大規模盛土造成地マップとは別のものです</h2>
 <div class="card">
 <table>

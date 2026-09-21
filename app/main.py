@@ -209,6 +209,13 @@ def api_check(q: str = "", lat: float = None, lon: float = None):
         "address": r.address, "lat": r.lat, "lon": r.lon, "status": r.status,
         "areas": [a.__dict__ for a in r.areas], "nearest_m": r.nearest_m,
         "notes": r.notes, "data_vintage": r.vintage, "attribution": r.attribution,
+        # 大規模盛土造成地（A54）。規制区域とは別の調査なので、別のキーで返す。
+        "fill_slope": {
+            "status": r.fill_status,
+            "areas": [f.__dict__ for f in r.fills],
+            "data_vintage": r.fill_vintage,
+            "attribution": r.fill_attribution,
+        },
     }
 
 
